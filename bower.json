@@ -1,0 +1,23 @@
+{
+  "name": "cloudcontrol",
+  "version": "0.0.0",
+  "authors": [
+    "Philipp Strube <pst@cloudcontrol.de>"
+  ],
+  "license": "none",
+  "homepage": "https://www.cloudcontrol.com",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.2.16",
+    "jquery": "~2.1.1",
+    "bootstrap": "~3.1.1",
+    "angular-local-storage": "~0.2.2"
+  }
+}
