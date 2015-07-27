@@ -2,6 +2,7 @@ import yaml
 from functools import wraps
 
 import tornado.web
+from jinja2 import TemplateNotFound
 
 from mitte import EngineMixin
 
@@ -24,6 +25,19 @@ def init_site(site_path):
     return site
 
 class PageHandler(EngineMixin, tornado.web.RequestHandler):
+
+    def write_error(self, status_code, **kwargs):
+        slug = "/{}".format(status_code)
+        try:
+            page_slug, page = self.get_page(slug)
+            template = self.get_template('{0}.html'.format(status_code))
+        except tornado.web.HTTPError or TemplateNotFound:
+            super(PageHandler, self).write_error(status_code, **kwargs)
+        else:
+            error_response = template.render(site=self.site, page=page)
+
+            self.write(error_response)
+            self.finish()
 
     @force_https
     @tornado.web.removeslash

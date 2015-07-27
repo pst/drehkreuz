@@ -107,9 +107,10 @@ class EngineMixin(object):
         if slug in pages:
             return slug, pages[slug]
 
-        wildcard_slug = "/{0}/*".format(slug.split('/')[1:-1][0])
-        if wildcard_slug in pages:
-            return wildcard_slug, pages[wildcard_slug]
+        if len(slug.split('/')) > 2:
+            wildcard_slug = "/{0}/*".format(slug.split('/')[1:-1][0])
+            if wildcard_slug in pages:
+                return wildcard_slug, pages[wildcard_slug]
 
         raise tornado.web.HTTPError(404)
 
