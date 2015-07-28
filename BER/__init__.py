@@ -9,13 +9,19 @@ from mitte import EngineMixin
 def force_https(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if not args[0].request.protocol == 'https' \
-        and not args[0].request.host.startswith('localhost:'):
+        if not args[0].settings.get('force_https', True):
+            return f(*args, **kwargs)
+
+        if args[0].request.host.startswith('localhost:'):
+            return f(*args, **kwargs)
+
+        if not args[0].request.protocol == 'https':
             args[0].redirect(
                 'https://{0}{1}'.format(
                     args[0].request.host, args[0].request.uri),
                 permanent=True)
         return f(*args, **kwargs)
+
     return wrapper
 
 def init_site(site_path):
