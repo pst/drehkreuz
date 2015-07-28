@@ -9,13 +9,19 @@ from mitte import EngineMixin
 def force_https(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
+        print 'before setting'
         if not args[0].settings.get('force_https', True):
+            print 'after setting'
             return f(*args, **kwargs)
 
+        print 'before localhost'
         if args[0].request.host.startswith('localhost:'):
+            print 'after localhost'
             return f(*args, **kwargs)
 
+        print 'before protocol https'
         if not args[0].request.protocol == 'https':
+            print 'after protocol https'
             args[0].redirect(
                 'https://{0}{1}'.format(
                     args[0].request.host, args[0].request.uri),
