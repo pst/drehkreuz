@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pst/BER.svg?branch=tests)](https://travis-ci.org/pst/BER)
+
 # BER content aggregation hub
 
 BER acts as a central hub aggregating content and data from various services.

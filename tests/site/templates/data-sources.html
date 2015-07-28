@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ page.title }}</h1>
+
+    <ul>
+        {% for data in test_data_1 %}
+            <li>{{ data.key1 }}: {{ data.value1 }}</li>
+        {% endfor %}
+        {% for data in test_data_2 %}
+            <li>{{ data.key2 }}: {{ data.value2 }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
