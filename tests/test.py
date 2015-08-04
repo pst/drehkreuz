@@ -138,3 +138,27 @@ class TestPageHandler(TestHandlerBase):
         self.assertEqual(200, overwrite.code)
 
         self.assertEqual(autodetect.body, overwrite.body)
+
+    def test_wildcard_slugs_3_levels(self):
+
+        response = self.fetch('/test-wildcard_slugs/a/b/c/test', method='GET')
+        self.assertEqual(200, response.code)
+
+        expected_h1 = '<h1>/test-wildcard_slugs/a/b/c/test</h1>'
+        self.assertIn(expected_h1, response.body)
+
+    def test_wildcard_slugs_2_levels(self):
+
+        response = self.fetch('/test-wildcard_slugs/a/b/test', method='GET')
+        self.assertEqual(200, response.code)
+
+        expected_h1 = '<h1>/test-wildcard_slugs/a/b/test</h1>'
+        self.assertIn(expected_h1, response.body)
+
+    def test_wildcard_slugs_1_level(self):
+
+        response = self.fetch('/test-wildcard_slugs/a/test', method='GET')
+        self.assertEqual(200, response.code)
+
+        expected_h1 = '<h1>/test-wildcard_slugs/a/test</h1>'
+        self.assertIn(expected_h1, response.body)
