@@ -162,3 +162,11 @@ class TestPageHandler(TestHandlerBase):
 
         expected_h1 = '<h1>/test-wildcard_slugs/a/test</h1>'
         self.assertIn(expected_h1, response.body)
+
+    def test_site_yaml_template_support(self):
+
+        response = self.fetch('/test-site-yaml-template-support', method='GET')
+        self.assertEqual(200, response.code)
+
+        expected_h1 = '<h1>set with jinja2</h1>'
+        self.assertIn(expected_h1, response.body)

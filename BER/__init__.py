@@ -1,8 +1,9 @@
 import yaml
+import os
 from functools import wraps
 
 import tornado.web
-from jinja2 import TemplateNotFound
+from jinja2 import Environment, TemplateNotFound
 
 from mitte import EngineMixin
 
@@ -26,7 +27,8 @@ def force_https(f):
 
 def init_site(site_path):
     with open(site_path) as f:
-        site = yaml.load(f)
+        t = Environment().from_string(f.read())
+        site = yaml.load(t.render(environ=os.environ))
 
     return site
 
