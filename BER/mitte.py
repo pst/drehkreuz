@@ -103,14 +103,20 @@ class EngineMixin(object):
 
     def get_page(self, slug):
         pages = self.site['pages']
-        
+
         if slug in pages:
             return slug, pages[slug]
 
-        if len(slug.split('/')) > 2:
-            wildcard_slug = "/{0}/*".format(slug.split('/')[1:-1][0])
-            if wildcard_slug in pages:
-                return wildcard_slug, pages[wildcard_slug]
+        wildcard_slugs = []
+        slug_split = slug.split('/')
+        slug_length = len(slug_split)
+        if slug_length > 2:
+            for i in range(1, slug_length - 1):
+                wcs = "/{0}/*".format('/'.join(slug_split[1:-i]))
+                wildcard_slugs.append(wcs)
+            for wildcard_slug in wildcard_slugs:
+                if wildcard_slug in pages:
+                    return wildcard_slug, pages[wildcard_slug]
 
         raise tornado.web.HTTPError(404)
 
