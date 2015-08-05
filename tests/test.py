@@ -25,7 +25,10 @@ class TestApplication(tornado.web.Application):
             static_url_prefix='/assets/',
             data_path=os.path.join(base_path, "tests", "site", "data"),
             site=init_site(os.path.join(base_path, "tests", "site", "site.yaml")),
-            force_https=False
+            force_https=False,
+            secure_headers={
+                'X-Frame-Options': 'DENY',
+                'X-Fake-Secure-Header': 'fake'}
         )
 
         log = logging.getLogger('tornado.application')
@@ -170,3 +173,32 @@ class TestPageHandler(TestHandlerBase):
 
         expected_h1 = '<h1>set with jinja2</h1>'
         self.assertIn(expected_h1, response.body)
+
+    def test_secure_headers_defaults(self):
+
+        response = self.fetch('/', method='GET')
+        self.assertEqual(200, response.code)
+
+        secure_headers = [
+            'X-Frame-Options',
+            'X-XSS-Protection',
+            'X-Content-Type-Options',
+            'X-Permitted-Cross-Domain-Policies']
+        for h in secure_headers:
+            self.assertIn(h, response.headers)
+
+    def test_secure_headers_settings_overwrite_defaults(self):
+
+        response = self.fetch('/', method='GET')
+        self.assertEqual(200, response.code)
+
+        self.assertEquals(
+            response.headers['X-Frame-Options'], 'DENY')
+
+    def test_secure_headers_added_in_settings_not_in_defaults(self):
+
+        response = self.fetch('/', method='GET')
+        self.assertEqual(200, response.code)
+
+        self.assertEquals(
+            response.headers['X-Fake-Secure-Header'], 'fake')
