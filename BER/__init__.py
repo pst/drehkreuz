@@ -25,6 +25,32 @@ def force_https(f):
 
     return wrapper
 
+def secure_headers(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        defaults = {
+            'X-Frame-Options': 'SAMEORIGIN',
+            'X-XSS-Protection': '1; mode=block',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Permitted-Cross-Domain-Policies': 'none'}
+
+        secure_headers = args[0].settings.get('secure_headers', defaults)
+
+        for d in defaults:
+            if d not in secure_headers:
+                secure_headers[d] = defaults[d]
+
+        if args[0].request.protocol == 'https':
+            if 'Strict-Transport-Security' not in secure_headers:
+                secure_headers['Strict-Transport-Security'] = 'max-age=631152000; includeSubdomains' # max-age 20 years
+
+        for h in secure_headers:
+            args[0].add_header(h, secure_headers[h])
+
+        return f(*args, **kwargs)
+
+    return wrapper
+
 def init_site(site_path):
     with open(site_path) as f:
         t = Environment().from_string(f.read())
@@ -47,8 +73,12 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
             self.write(error_response)
             self.finish()
 
-    @force_https
     @tornado.web.removeslash
+    @secure_headers
+    @force_https
+    def prepare(self):
+        pass
+
     @tornado.web.asynchronous
     @tornado.gen.engine
     def get(self, slug=None):
