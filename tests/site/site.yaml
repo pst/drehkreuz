@@ -74,3 +74,10 @@ pages:
     title: "Sitemap"
     tpl_name: "/sitemap.xml"
     content-type: "application/xml"
+  /test-redirect:
+    redirect:
+      target: "/"
+  /test-redirect-perm:
+    redirect:
+      target: "/"
+      permanent: True

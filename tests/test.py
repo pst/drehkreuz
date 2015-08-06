@@ -208,4 +208,17 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/sitemap.xml', method='GET')
         self.assertEqual(200, response.code)
         self.assertEquals(response.headers['Content-Type'], 'application/xml')
-        
+
+    def test_redirect(self):
+
+        response = self.fetch(
+            '/test-redirect', method='GET', follow_redirects=False)
+        self.assertEqual(302, response.code)
+        self.assertEqual(response.headers['Location'], '/')
+
+    def test_redirect_perm(self):
+
+        response = self.fetch(
+            '/test-redirect-perm', method='GET', follow_redirects=False)
+        self.assertEqual(301, response.code)
+        self.assertEqual(response.headers['Location'], '/')
