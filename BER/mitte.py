@@ -71,7 +71,8 @@ class EngineMixin(object):
             'remote_ip': self.request.remote_ip,
             'path': self.request.path,
             'uri': self.request.uri,
-            'method': self.request.method}
+            'method': self.request.method,
+            'protocol': self.request.protocol}
         return globals
 
     @tornado.gen.coroutine

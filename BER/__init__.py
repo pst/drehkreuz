@@ -95,6 +95,9 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
         if 'published' in page and page['published'] == False:
             raise tornado.web.HTTPError(404)
 
+        if 'content-type' in page:
+            self.set_header("Content-Type", page['content-type'])
+
         if 'tpl_name' in page:
             template = self.get_template(page['tpl_name'])
         else:
