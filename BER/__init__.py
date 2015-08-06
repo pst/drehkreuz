@@ -84,6 +84,12 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
     def get(self, slug=None):
         page_slug, page = self.get_page(slug)
 
+        if 'redirect' in page:
+            perm = False
+            if 'permanent' in page['redirect']:
+                perm = page['redirect']['permanent']
+            self.redirect(page['redirect']['target'], perm)
+
         data_sources = {}
         if 'data_sources' in page:
             sources = page['data_sources']
