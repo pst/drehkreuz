@@ -36,7 +36,7 @@ class TestApplication(tornado.web.Application):
         handlers = [(r"/assets/(.*)",
                         tornado.web.StaticFileHandler,
                         dict(path=settings['static_path'])),
-                    (r"(/[a-z0-9\-_\/]*)$", PageHandler)]
+                    (r"(/[a-z0-9\-_\/\.]*)$", PageHandler)]
 
         tornado.web.Application.__init__(self, handlers, **settings)
 
@@ -202,3 +202,10 @@ class TestPageHandler(TestHandlerBase):
 
         self.assertEquals(
             response.headers['X-Fake-Secure-Header'], 'fake')
+
+    def test_custom_content_type(self):
+
+        response = self.fetch('/sitemap.xml', method='GET')
+        self.assertEqual(200, response.code)
+        self.assertEquals(response.headers['Content-Type'], 'application/xml')
+        

@@ -67,3 +67,10 @@ pages:
     title: "Site Yaml Template Support"
     {% set var = 'set with jinja2' %}
     template_set_var: {{ var }}
+  /sitemap.xml:
+    listed: false
+    position: 100
+    published: true
+    title: "Sitemap"
+    tpl_name: "/sitemap.xml"
+    content-type: "application/xml"
