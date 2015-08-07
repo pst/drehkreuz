@@ -21,6 +21,7 @@ def force_https(f):
                 'https://{0}{1}'.format(
                     args[0].request.host, args[0].request.uri),
                 permanent=True)
+            raise tornado.web.Finish()
         return f(*args, **kwargs)
 
     return wrapper
@@ -89,6 +90,7 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
             if 'permanent' in page['redirect']:
                 perm = page['redirect']['permanent']
             self.redirect(page['redirect']['target'], perm)
+            raise tornado.web.Finish()
 
         data_sources = {}
         if 'data_sources' in page:
