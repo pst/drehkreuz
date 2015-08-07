@@ -86,11 +86,16 @@ class EngineMixin(object):
         if src.startswith('http'):
             request = tornado.httpclient.HTTPRequest(src)
             response = yield tornado.gen.Task(self.client.fetch, request)
+            if response.code >= 400:
+                raise tornado.web.HTTPError(response.code)
             data = response.body
         else:
             path = os.path.join(self.settings['data_path'], src)
-            with open(path) as f:
-                data = f.read()
+            try:
+                with open(path) as f:
+                    data = f.read()
+            except IOError:
+                raise tornado.web.HTTPError(404)
 
         if source['format'] == 'json':
             parsed_data = json.loads(data)
@@ -99,7 +104,6 @@ class EngineMixin(object):
         elif source['format'] == 'rss':
             parsed_data = feedparser.parse(data)
 
- 
         raise tornado.gen.Return(parsed_data)
 
     def get_page(self, slug):
