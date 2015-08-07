@@ -131,6 +131,10 @@ class TestPageHandler(TestHandlerBase):
         expected_li_2 = '<li>key2: value2</li>'
         self.assertIn(expected_li_2, response.body)
 
+    def test_data_source_errors(self):
+        response = self.fetch('/data-source-404', method='GET')
+        self.assertEqual(404, response.code)
+
     def test_autodetected_and_overwritten_templates(self):
         """ test that pages specifying the tpl_name attribute get the correct
         template """
