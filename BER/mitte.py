@@ -11,7 +11,10 @@ import tornado.httpserver
 import tornado.httpclient
 import tornado.gen
 import feedparser
-from jinja2 import Environment as JinjaEnvironment, FileSystemLoader
+from jinja2 import (
+    Environment as JinjaEnvironment,
+    FileSystemLoader,
+    FileSystemBytecodeCache)
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
 from webassets.filter import register_filter
@@ -27,8 +30,11 @@ class EngineMixin(object):
         assets_env = AssetsEnvironment(
             self.settings['static_path'], self.static_url(''))
         register_filter(LibSass)
+
         self.template_env = JinjaEnvironment(
-            loader=loader, extensions=[AssetsExtension])
+            loader=loader,
+            extensions=[AssetsExtension],
+            bytecode_cache=FileSystemBytecodeCache())
         
         self.template_env.assets_environment = assets_env
 
