@@ -18,7 +18,7 @@ from jinja2 import (
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
 from webassets.filter import register_filter
-from webassets_libsass import LibSass
+from webassets.filter.libsass import LibSass
 
 
 class EngineMixin(object):
@@ -35,7 +35,7 @@ class EngineMixin(object):
             loader=loader,
             extensions=[AssetsExtension],
             bytecode_cache=FileSystemBytecodeCache())
-        
+
         self.template_env.assets_environment = assets_env
 
         self.template_env.filters['stylesheet_tag'] = self.stylesheet_tag
