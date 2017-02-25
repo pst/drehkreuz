@@ -113,6 +113,12 @@ class TestPageHandler(TestHandlerBase):
         expected_js = '''var test_var = true'''
         self.assertIn(expected_js, js_response.body)
 
+    def test_markdown_filter(self):
+        response = self.fetch('/markdown', method='GET')
+        
+        self.assertEqual(200, response.code)
+        self.assertEqual('<h1>Markdown Test</h1>\n', response.body)
+
     def test_unpublished_page(self):
         """ test that pages marked as unpublished return 404 """
 

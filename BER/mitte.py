@@ -11,10 +11,12 @@ import tornado.httpserver
 import tornado.httpclient
 import tornado.gen
 import feedparser
+import misaka
 from jinja2 import (
     Environment as JinjaEnvironment,
     FileSystemLoader,
-    FileSystemBytecodeCache)
+    FileSystemBytecodeCache,
+    Markup)
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
 from webassets.filter import register_filter
@@ -42,6 +44,7 @@ class EngineMixin(object):
         self.template_env.filters['javascript_tag'] = self.javascript_tag
         self.template_env.filters['theme_image_url'] = self.theme_image_url
         self.template_env.filters['strftime'] = self.strftime
+        self.template_env.filters['markdown'] = self.markdown
 
         self.template_env.globals.update(self.get_globals())
 
@@ -68,6 +71,9 @@ class EngineMixin(object):
 
     def strftime(self, time_struct, format):
         return strftime(format, time_struct)
+
+    def markdown(self, text):
+        return Markup(misaka.html(text))
 
     def get_globals(self):
         globals = {
