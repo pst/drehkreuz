@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='BER',
-    version='0.1.8',
+    version='0.1.9',
     description='BER content aggregation hub',
     author='Philipp Strube',
     author_email='pst@cloudcontrol.de',
