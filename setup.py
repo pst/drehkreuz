@@ -17,5 +17,6 @@ setup(
         "webassets==0.12.1",
         "libsass==0.12.3",
         "feedparser==5.2.1",
+        "misaka==2.1.0"
     ]
 )
