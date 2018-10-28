@@ -73,7 +73,10 @@ class EngineMixin(object):
         return strftime(format, time_struct)
 
     def markdown(self, text):
-        return Markup(misaka.html(text))
+        md = misaka.Markdown(
+            misaka.HtmlRenderer(),
+            extensions=('fenced-code',))
+        return Markup(md(text))
 
     def get_globals(self):
         globals = {
