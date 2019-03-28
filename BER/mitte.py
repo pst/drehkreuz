@@ -1,26 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import json
+import os
 from time import strftime
 
-import yaml
-import tornado.web
-import tornado.httpserver
-import tornado.httpclient
-import tornado.gen
 import feedparser
+
+from jinja2 import (Environment as JinjaEnvironment,
+                    FileSystemBytecodeCache,
+                    FileSystemLoader,
+                    Markup)
+
 import misaka
-from jinja2 import (
-    Environment as JinjaEnvironment,
-    FileSystemLoader,
-    FileSystemBytecodeCache,
-    Markup)
+
+import tornado.gen
+import tornado.httpclient
+import tornado.httpserver
+import tornado.web
+
 from webassets import Environment as AssetsEnvironment
 from webassets.ext.jinja2 import AssetsExtension
 from webassets.filter import register_filter
 from webassets.filter.libsass import LibSass
+
+import yaml
 
 
 class EngineMixin(object):
@@ -55,7 +59,10 @@ class EngineMixin(object):
         href = name
         if not name.startswith('http'):
             href = self.static_url(name)
-        return '<link type="text/css" rel="stylesheet" media="screen" href="{0}">'.format(href)
+        return ('<link type="text/css"'
+                'rel="stylesheet"'
+                'media="screen"'
+                'href="{0}">'.format(href))
 
     def javascript_tag(self, name):
         src = name

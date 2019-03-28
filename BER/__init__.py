@@ -1,11 +1,14 @@
-import yaml
 import os
 from functools import wraps
 
-import tornado.web
 from jinja2 import Environment, TemplateNotFound
 
-from mitte import EngineMixin
+import tornado.web
+
+import yaml
+
+from .mitte import EngineMixin
+
 
 def force_https(f):
     @wraps(f)
@@ -26,6 +29,7 @@ def force_https(f):
 
     return wrapper
 
+
 def secure_headers(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -43,7 +47,7 @@ def secure_headers(f):
 
         if args[0].request.protocol == 'https':
             if 'Strict-Transport-Security' not in secure_headers:
-                secure_headers['Strict-Transport-Security'] = 'max-age=631152000; includeSubdomains' # max-age 20 years
+                secure_headers['Strict-Transport-Security'] = 'max-age=631152000; includeSubdomains'  # max-age 20 years  # noqa: E501
 
         for h in secure_headers:
             args[0].add_header(h, secure_headers[h])
@@ -52,12 +56,14 @@ def secure_headers(f):
 
     return wrapper
 
+
 def init_site(site_path):
     with open(site_path) as f:
         t = Environment().from_string(f.read())
         site = yaml.load(t.render(environ=os.environ))
 
     return site
+
 
 class PageHandler(EngineMixin, tornado.web.RequestHandler):
 
@@ -80,8 +86,7 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
     def prepare(self):
         pass
 
-    @tornado.web.asynchronous
-    @tornado.gen.engine
+    @tornado.gen.coroutine
     def get(self, slug=None):
         page_slug, page = self.get_page(slug)
 
@@ -100,7 +105,7 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
                 data = yield self.get_data(sources[name], slug=source_slug)
                 data_sources[name] = data
 
-        if 'published' in page and page['published'] == False:
+        if 'published' in page and page['published'] is False:
             raise tornado.web.HTTPError(404)
 
         if 'content-type' in page:

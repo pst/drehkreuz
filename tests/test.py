@@ -1,44 +1,43 @@
-import unittest
 import os
 import sys
-import logging
+
+from BER import PageHandler, init_site
 
 import tornado.web
-from mock import patch
-from tornado.testing import AsyncHTTPTestCase, gen_test
+from tornado.testing import AsyncHTTPTestCase
 
-from BER import init_site, PageHandler
 
 # add application root to sys.path
 APP_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(APP_ROOT, '..'))
+
 
 class TestApplication(tornado.web.Application):
 
     def __init__(self):
 
         base_path = os.path.abspath('.')
+        site_path = os.path.join(base_path, "tests", "site")
         settings = dict(
-            template_path=os.path.join(base_path, "tests", "site", "templates"),
-            snippet_path=os.path.join(base_path, "tests", "site", "snippets"),
-            static_path=os.path.join(base_path, "tests", "site", "assets"),
+            template_path=os.path.join(site_path, "templates"),
+            snippet_path=os.path.join(site_path, "snippets"),
+            static_path=os.path.join(site_path, "assets"),
             static_url_prefix='/assets/',
-            data_path=os.path.join(base_path, "tests", "site", "data"),
-            site=init_site(os.path.join(base_path, "tests", "site", "site.yaml")),
+            data_path=os.path.join(site_path, "data"),
+            site=init_site(os.path.join(site_path, "site.yaml")),
             force_https=False,
             secure_headers={
                 'X-Frame-Options': 'DENY',
                 'X-Fake-Secure-Header': 'fake'}
         )
 
-        log = logging.getLogger('tornado.application')
-
         handlers = [(r"/assets/(.*)",
-                        tornado.web.StaticFileHandler,
-                        dict(path=settings['static_path'])),
+                     tornado.web.StaticFileHandler,
+                     dict(path=settings['static_path'])),
                     (r"(/[a-z0-9\-_\/\.]*)$", PageHandler)]
 
         tornado.web.Application.__init__(self, handlers, **settings)
+
 
 test_app = TestApplication()
 
@@ -75,7 +74,7 @@ class TestPageHandler(TestHandlerBase):
         self.assertEqual(200, response.code)
 
         # CSS
-        expected_stylesheet_regexp = r'<link type="text/css" rel="stylesheet" media="screen" href="/assets/dist/css/style.css[\?v=a-z0-9]*">'
+        expected_stylesheet_regexp = r'<link type="text/css" rel="stylesheet" media="screen" href="/assets/dist/css/style.css[\?v=a-z0-9]*">'  # noqa: E501
         self.assertRegexpMatches(response.body, expected_stylesheet_regexp)
 
         css_response = self.fetch(
@@ -100,7 +99,7 @@ class TestPageHandler(TestHandlerBase):
         self.assertEqual(200, response.code)
 
         # JS
-        expected_script_regexp = r'<script type="text/javascript" src="/assets/dist/js/app.js[\?v=a-z0-9]*"></script>'
+        expected_script_regexp = r'<script type="text/javascript" src="/assets/dist/js/app.js[\?v=a-z0-9]*"></script>'  # noqa: E501
         self.assertRegexpMatches(response.body, expected_script_regexp)
 
         js_response = self.fetch(
@@ -115,7 +114,7 @@ class TestPageHandler(TestHandlerBase):
 
     def test_markdown_filter(self):
         response = self.fetch('/markdown', method='GET')
-        
+
         self.assertEqual(200, response.code)
         self.assertEqual('<h1>Markdown Test</h1>\n', response.body)
 
