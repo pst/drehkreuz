@@ -122,7 +122,7 @@ class EngineMixin(object):
         if source['format'] == 'json':
             parsed_data = json.loads(data)
         elif source['format'] == 'yaml':
-            parsed_data = yaml.load(data)
+            parsed_data = yaml.safe_load(data)
         elif source['format'] == 'rss':
             parsed_data = feedparser.parse(data)
 

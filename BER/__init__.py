@@ -60,7 +60,7 @@ def secure_headers(f):
 def init_site(site_path):
     with open(site_path) as f:
         t = Environment().from_string(f.read())
-        site = yaml.load(t.render(environ=os.environ))
+        site = yaml.full_load(t.render(environ=os.environ))
 
     return site
 
