@@ -107,7 +107,7 @@ class EngineMixin(object):
 
         if src.startswith('http'):
             request = tornado.httpclient.HTTPRequest(src)
-            response = yield tornado.gen.Task(self.client.fetch, request)
+            response = yield self.client.fetch(request)
             if response.code >= 400:
                 raise tornado.web.HTTPError(response.code)
             data = response.body

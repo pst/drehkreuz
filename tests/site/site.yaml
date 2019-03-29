@@ -31,6 +31,9 @@ pages:
       test_data_2:
         format: "yaml"
         src: "test_data_source2.yaml"
+      test_data_remote:
+        format: "json"
+        src: "https://jsonplaceholder.typicode.com/todos/1"
   /data-source-404:
     listed: false
     position: 0
