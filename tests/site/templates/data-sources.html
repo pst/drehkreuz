@@ -10,5 +10,6 @@
         {% for data in test_data_2 %}
             <li>{{ data.key2 }}: {{ data.value2 }}</li>
         {% endfor %}
+        <li>id: {{ test_data_remote['id'] }}</li>
     </ul>
 {% endblock %}

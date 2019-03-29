@@ -137,6 +137,9 @@ class TestPageHandler(TestHandlerBase):
         expected_li_2 = b'<li>key2: value2</li>'
         self.assertIn(expected_li_2, response.body)
 
+        expected_li_3 = b'<li>id: 1</li>'
+        self.assertIn(expected_li_3, response.body)
+
     def test_data_source_errors(self):
         response = self.fetch('/data-source-404', method='GET')
         self.assertEqual(404, response.code)
