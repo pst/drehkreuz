@@ -60,9 +60,9 @@ class EngineMixin(object):
         if not name.startswith('http'):
             href = self.static_url(name)
         return ('<link type="text/css"'
-                'rel="stylesheet"'
-                'media="screen"'
-                'href="{0}">'.format(href))
+                ' rel="stylesheet"'
+                ' media="screen"'
+                ' href="{0}">'.format(href))
 
     def javascript_tag(self, name):
         src = name
@@ -126,7 +126,7 @@ class EngineMixin(object):
         elif source['format'] == 'rss':
             parsed_data = feedparser.parse(data)
 
-        raise tornado.gen.Return(parsed_data)
+        return parsed_data
 
     def get_page(self, slug):
         pages = self.site['pages']
