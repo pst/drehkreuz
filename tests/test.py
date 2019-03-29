@@ -1,44 +1,43 @@
-import unittest
 import os
 import sys
-import logging
+
+from BER import PageHandler, init_site
 
 import tornado.web
-from mock import patch
-from tornado.testing import AsyncHTTPTestCase, gen_test
+from tornado.testing import AsyncHTTPTestCase
 
-from BER import init_site, PageHandler
 
 # add application root to sys.path
 APP_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(APP_ROOT, '..'))
+
 
 class TestApplication(tornado.web.Application):
 
     def __init__(self):
 
         base_path = os.path.abspath('.')
+        site_path = os.path.join(base_path, "tests", "site")
         settings = dict(
-            template_path=os.path.join(base_path, "tests", "site", "templates"),
-            snippet_path=os.path.join(base_path, "tests", "site", "snippets"),
-            static_path=os.path.join(base_path, "tests", "site", "assets"),
+            template_path=os.path.join(site_path, "templates"),
+            snippet_path=os.path.join(site_path, "snippets"),
+            static_path=os.path.join(site_path, "assets"),
             static_url_prefix='/assets/',
-            data_path=os.path.join(base_path, "tests", "site", "data"),
-            site=init_site(os.path.join(base_path, "tests", "site", "site.yaml")),
+            data_path=os.path.join(site_path, "data"),
+            site=init_site(os.path.join(site_path, "site.yaml")),
             force_https=False,
             secure_headers={
                 'X-Frame-Options': 'DENY',
                 'X-Fake-Secure-Header': 'fake'}
         )
 
-        log = logging.getLogger('tornado.application')
-
         handlers = [(r"/assets/(.*)",
-                        tornado.web.StaticFileHandler,
-                        dict(path=settings['static_path'])),
+                     tornado.web.StaticFileHandler,
+                     dict(path=settings['static_path'])),
                     (r"(/[a-z0-9\-_\/\.]*)$", PageHandler)]
 
         tornado.web.Application.__init__(self, handlers, **settings)
+
 
 test_app = TestApplication()
 
@@ -60,10 +59,10 @@ class TestPageHandler(TestHandlerBase):
 
         self.assertEqual(200, response.code)
 
-        expected_title = '<title>Index - BER Test Site</title>'
+        expected_title = b'<title>Index - BER Test Site</title>'
         self.assertIn(expected_title, response.body)
 
-        expected_h1 = '<h1>Index</h1>'
+        expected_h1 = b'<h1>Index</h1>'
         self.assertIn(expected_h1, response.body)
 
     def test_css_assets(self):
@@ -75,7 +74,8 @@ class TestPageHandler(TestHandlerBase):
         self.assertEqual(200, response.code)
 
         # CSS
-        expected_stylesheet_regexp = r'<link type="text/css" rel="stylesheet" media="screen" href="/assets/dist/css/style.css[\?v=a-z0-9]*">'
+        expected_stylesheet_regexp = rb'<link type="text/css" rel="stylesheet" media="screen" href="/assets/dist/css/style.css[\?v=a-z0-9]*">'  # noqa: E501
+        print(response.body)
         self.assertRegexpMatches(response.body, expected_stylesheet_regexp)
 
         css_response = self.fetch(
@@ -85,7 +85,7 @@ class TestPageHandler(TestHandlerBase):
         self.assertEqual(
             'text/css', css_response.headers['Content-Type'])
 
-        expected_css = '''body {
+        expected_css = b'''body {
   font: 100% Helvetica, sans-serif;
   color: #333; }
 '''
@@ -100,7 +100,7 @@ class TestPageHandler(TestHandlerBase):
         self.assertEqual(200, response.code)
 
         # JS
-        expected_script_regexp = r'<script type="text/javascript" src="/assets/dist/js/app.js[\?v=a-z0-9]*"></script>'
+        expected_script_regexp = rb'<script type="text/javascript" src="/assets/dist/js/app.js[\?v=a-z0-9]*"></script>'  # noqa: E501
         self.assertRegexpMatches(response.body, expected_script_regexp)
 
         js_response = self.fetch(
@@ -110,14 +110,14 @@ class TestPageHandler(TestHandlerBase):
         self.assertEqual(
             'application/javascript', js_response.headers['Content-Type'])
 
-        expected_js = '''var test_var = true'''
+        expected_js = b'''var test_var = true'''
         self.assertIn(expected_js, js_response.body)
 
     def test_markdown_filter(self):
         response = self.fetch('/markdown', method='GET')
-        
+
         self.assertEqual(200, response.code)
-        self.assertEqual('<h1>Markdown Test</h1>\n', response.body)
+        self.assertEqual(b'<h1>Markdown Test</h1>\n', response.body)
 
     def test_unpublished_page(self):
         """ test that pages marked as unpublished return 404 """
@@ -131,10 +131,10 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/data-sources', method='GET')
         self.assertEqual(200, response.code)
 
-        expected_li_1 = '<li>key1: value1</li>'
+        expected_li_1 = b'<li>key1: value1</li>'
         self.assertIn(expected_li_1, response.body)
 
-        expected_li_2 = '<li>key2: value2</li>'
+        expected_li_2 = b'<li>key2: value2</li>'
         self.assertIn(expected_li_2, response.body)
 
     def test_data_source_errors(self):
@@ -157,7 +157,7 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/test-wildcard_slugs/a/b/c/test', method='GET')
         self.assertEqual(200, response.code)
 
-        expected_h1 = '<h1>/test-wildcard_slugs/a/b/c/test</h1>'
+        expected_h1 = b'<h1>/test-wildcard_slugs/a/b/c/test</h1>'
         self.assertIn(expected_h1, response.body)
 
     def test_wildcard_slugs_2_levels(self):
@@ -165,7 +165,7 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/test-wildcard_slugs/a/b/test', method='GET')
         self.assertEqual(200, response.code)
 
-        expected_h1 = '<h1>/test-wildcard_slugs/a/b/test</h1>'
+        expected_h1 = b'<h1>/test-wildcard_slugs/a/b/test</h1>'
         self.assertIn(expected_h1, response.body)
 
     def test_wildcard_slugs_1_level(self):
@@ -173,7 +173,7 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/test-wildcard_slugs/a/test', method='GET')
         self.assertEqual(200, response.code)
 
-        expected_h1 = '<h1>/test-wildcard_slugs/a/test</h1>'
+        expected_h1 = b'<h1>/test-wildcard_slugs/a/test</h1>'
         self.assertIn(expected_h1, response.body)
 
     def test_site_yaml_template_support(self):
@@ -181,7 +181,7 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/test-site-yaml-template-support', method='GET')
         self.assertEqual(200, response.code)
 
-        expected_h1 = '<h1>set with jinja2</h1>'
+        expected_h1 = b'<h1>set with jinja2</h1>'
         self.assertIn(expected_h1, response.body)
 
     def test_secure_headers_defaults(self):
@@ -202,7 +202,7 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/', method='GET')
         self.assertEqual(200, response.code)
 
-        self.assertEquals(
+        self.assertEqual(
             response.headers['X-Frame-Options'], 'DENY')
 
     def test_secure_headers_added_in_settings_not_in_defaults(self):
@@ -210,14 +210,14 @@ class TestPageHandler(TestHandlerBase):
         response = self.fetch('/', method='GET')
         self.assertEqual(200, response.code)
 
-        self.assertEquals(
+        self.assertEqual(
             response.headers['X-Fake-Secure-Header'], 'fake')
 
     def test_custom_content_type(self):
 
         response = self.fetch('/sitemap.xml', method='GET')
         self.assertEqual(200, response.code)
-        self.assertEquals(response.headers['Content-Type'], 'application/xml')
+        self.assertEqual(response.headers['Content-Type'], 'application/xml')
 
     def test_redirect(self):
 

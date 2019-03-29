@@ -4,19 +4,19 @@ from setuptools import setup
 
 setup(
     name='BER',
-    version='0.1.10',
+    version='0.2.0',
     description='BER content aggregation hub',
     author='Philipp Strube',
-    author_email='pst@cloudcontrol.de',
+    author_email='pst@kubestack.com',
     url='',
     packages=['BER'],
     install_requires=[
-        "tornado==4.4.2",
-        "PyYAML==3.11",
-        "Jinja2==2.7.3",
-        "webassets==0.12.1",
-        "libsass==0.12.3",
-        "feedparser==5.2.1",
-        "misaka==2.1.0"
+        "tornado",
+        "PyYAML",
+        "Jinja2",
+        "webassets",
+        "libsass",
+        "feedparser",
+        "misaka"
     ]
 )
