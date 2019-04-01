@@ -75,7 +75,6 @@ class TestPageHandler(TestHandlerBase):
 
         # CSS
         expected_stylesheet_regexp = rb'<link type="text/css" rel="stylesheet" media="screen" href="/assets/dist/css/style.css[\?v=a-z0-9]*">'  # noqa: E501
-        print(response.body)
         self.assertRegexpMatches(response.body, expected_stylesheet_regexp)
 
         css_response = self.fetch(

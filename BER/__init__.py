@@ -1,5 +1,6 @@
 import os
 from functools import wraps
+from re import compile
 
 from jinja2 import Environment, TemplateNotFound
 
@@ -61,6 +62,10 @@ def init_site(site_path):
     with open(site_path) as f:
         t = Environment().from_string(f.read())
         site = yaml.full_load(t.render(environ=os.environ))
+
+    site['routes'] = []
+    for page in site['pages']:
+        site['routes'].append(compile(page))
 
     return site
 

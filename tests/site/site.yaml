@@ -54,19 +54,19 @@ pages:
     published: true
     title: "Test Overwritten Template Name"
     tpl_name: "/test-tpl-name-autodetect.html"
-  /test-wildcard_slugs/a/b/c/*:
+  /test-wildcard_slugs/a/b/c/.*:
     listed: false
     position: 0
     published: true
     title: "Wildcard Slugs"
     tpl_name: "/test-wildcard_slugs_3_levels.html"
-  /test-wildcard_slugs/a/b/*:
+  /test-wildcard_slugs/a/b/.*:
     listed: false
     position: 0
     published: true
     title: "Wildcard Slugs"
     tpl_name: "/test-wildcard_slugs_2_levels.html"
-  /test-wildcard_slugs/a/*:
+  /test-wildcard_slugs/a/.*:
     listed: false
     position: 0
     published: true
