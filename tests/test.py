@@ -178,6 +178,24 @@ class TestPageHandler(TestHandlerBase):
         expected_h1 = b'<h1>/test-wildcard_slugs/a/test</h1>'
         self.assertIn(expected_h1, response.body)
 
+    def test_wildcard_slugs_data_source(self):
+
+        response = self.fetch(
+            '/test-wildcard_slugs-data_source/wildcard_data', method='GET')
+        self.assertEqual(200, response.code)
+
+        expected_h1 = b'<h1>{\'key\': \'value\'}</h1>'
+        self.assertIn(expected_h1, response.body)
+
+    def test_two_named_groups_data_source(self):
+        response = self.fetch(
+            '/test_two_named_groups/path1/file', method='GET')
+        self.assertEqual(200, response.code)
+
+        response = self.fetch(
+            '/test_two_named_groups/path2/file', method='GET')
+        self.assertEqual(200, response.code)
+
     def test_site_yaml_template_support(self):
 
         response = self.fetch('/test-site-yaml-template-support', method='GET')

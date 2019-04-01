@@ -63,9 +63,7 @@ def init_site(site_path):
         t = Environment().from_string(f.read())
         site = yaml.full_load(t.render(environ=os.environ))
 
-    site['routes'] = []
-    for page in site['pages']:
-        site['routes'].append(compile(page))
+    site['routes'] = list(map(lambda page: compile(page), site['pages']))
 
     return site
 
@@ -75,7 +73,7 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
     def write_error(self, status_code, **kwargs):
         slug = "/{}".format(status_code)
         try:
-            page_slug, page = self.get_page(slug)
+            page_slug, page, named_groups = self.get_page(slug)
             template = self.get_template('{0}.html'.format(status_code))
         except tornado.web.HTTPError or TemplateNotFound:
             super(PageHandler, self).write_error(status_code, **kwargs)
@@ -93,7 +91,7 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
 
     @tornado.gen.coroutine
     def get(self, slug=None):
-        page_slug, page = self.get_page(slug)
+        page_slug, page, named_groups = self.get_page(slug)
 
         if 'redirect' in page:
             perm = False
@@ -106,8 +104,8 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
         if 'data_sources' in page:
             sources = page['data_sources']
             for name in sources:
-                source_slug = slug[len(page_slug.strip('*')):]
-                data = yield self.get_data(sources[name], slug=source_slug)
+                data = yield self.get_data(sources[name],
+                                           named_groups=named_groups)
                 data_sources[name] = data
 
         if 'published' in page and page['published'] is False:

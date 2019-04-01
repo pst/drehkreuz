@@ -72,6 +72,25 @@ pages:
     published: true
     title: "Wildcard Slugs"
     tpl_name: "/test-wildcard_slugs_1_level.html"
+  /test-wildcard_slugs-data_source/(?P<name>.*):
+    listed: false
+    position: 0
+    published: true
+    title: "Wildcard Slugs"
+    tpl_name: "/test-wildcard_slugs_data_source.html"
+    data_sources:
+      wildcard_data:
+        format: "json"
+        src: "{name}.json"
+  /test_two_named_groups/(?P<path>.+)/(?P<file>.*):
+    listed: false
+    position: 0
+    published: true
+    tpl_name: index.html
+    data_sources:
+      data:
+        format: "json"
+        src: "{path}/{file}.json"
   /test-site-yaml-template-support:
     listed: false
     position: 0

@@ -98,12 +98,12 @@ class EngineMixin(object):
         return globals
 
     @tornado.gen.coroutine
-    def get_data(self, source, slug=None):
+    def get_data(self, source, named_groups=None):
         data = None
         src = source['src']
 
-        if slug:
-            src = src.format(slug)
+        if named_groups:
+            src = src.format(**named_groups)
 
         if src.startswith('http'):
             request = tornado.httpclient.HTTPRequest(src)
@@ -133,8 +133,12 @@ class EngineMixin(object):
         pages = self.site['pages']
 
         for route in routes:
-            if route.fullmatch(slug):
-                return route.pattern, pages[route.pattern]
+            match = route.fullmatch(slug)
+            if match:
+                named_groups = {
+                    k: match.groups()[v-1]
+                    for k, v in route.groupindex.items()}
+                return route.pattern, pages[route.pattern], named_groups
 
         raise tornado.web.HTTPError(404)
 
