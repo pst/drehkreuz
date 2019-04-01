@@ -252,3 +252,9 @@ class TestPageHandler(TestHandlerBase):
             '/test-redirect-perm', method='GET', follow_redirects=False)
         self.assertEqual(301, response.code)
         self.assertEqual(response.headers['Location'], '/')
+
+    def test_custom_error_page(self):
+        response = self.fetch('/404-test', method='GET')
+        self.assertEqual(404, response.code)
+        expected_h1 = b'<h1>404 Page Not Found</h1>'
+        self.assertIn(expected_h1, response.body)

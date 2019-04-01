@@ -71,15 +71,28 @@ def init_site(site_path):
 class PageHandler(EngineMixin, tornado.web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
-        slug = "/{}".format(status_code)
+        # default to status_code template
+        tpl_name = f'{status_code}.html'
+        page = None
         try:
-            page_slug, page, named_groups = self.get_page(slug)
-            template = self.get_template('{0}.html'.format(status_code))
-        except tornado.web.HTTPError or TemplateNotFound:
+            # try to get custom error page from site.yaml
+            _, page, _ = self.get_page(f"/{status_code}")
+        except tornado.web.HTTPError:
+            # if site.yaml doesn't have a page for this error code
+            pass
+        else:
+            # overwrite with page's template if set
+            if 'tpl_name' in page:
+                tpl_name = page['tpl_name']
+
+        try:
+            template = self.get_template(tpl_name)
+        except TemplateNotFound:
+            # fall back to Tornado default error page
             super(PageHandler, self).write_error(status_code, **kwargs)
         else:
+            # return our custom error page
             error_response = template.render(site=self.site, page=page)
-
             self.finish(error_response)
 
     @tornado.web.removeslash
