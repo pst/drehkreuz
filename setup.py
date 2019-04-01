@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='BER',
-    version='0.3.0',
+    version='0.3.1',
     description='BER content aggregation hub',
     author='Philipp Strube',
     author_email='pst@kubestack.com',

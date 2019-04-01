@@ -19,7 +19,7 @@ pages:
     position: 0
     published: false
     title: "Unpublished"
-  /data-sources:
+  /data-sources/(?P<port>[0-9]+):
     listed: false
     position: 0
     published: true
@@ -29,11 +29,14 @@ pages:
         format: "yaml"
         src: "test_data_source1.yaml"
       test_data_2:
-        format: "yaml"
-        src: "test_data_source2.yaml"
+        format: "json"
+        src: "test_data_source2.json"
       test_data_remote:
         format: "json"
-        src: "https://jsonplaceholder.typicode.com/todos/1"
+        src: "http://localhost:{port}/json"
+    tpl_name: "data-sources.html"
+  /json:
+    tpl_name: "/json.html"
   /data-source-404:
     listed: false
     position: 0
@@ -43,6 +46,15 @@ pages:
       test_data_1:
         format: "json"
         src: "file-does-not-exist.json"
+  /remote-data-source-404/(?P<port>[0-9]+):
+    listed: false
+    position: 0
+    published: true
+    title: "Data Source"
+    data_sources:
+      remote_data:
+        format: "json"
+        src: "http://localhost:{port}/404"
   /test-tpl-name-autodetect:
     listed: false
     position: 0
