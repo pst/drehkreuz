@@ -1,5 +1,6 @@
 import os
 from functools import wraps
+from re import compile
 
 from jinja2 import Environment, TemplateNotFound
 
@@ -62,23 +63,37 @@ def init_site(site_path):
         t = Environment().from_string(f.read())
         site = yaml.full_load(t.render(environ=os.environ))
 
+    site['routes'] = list(map(lambda page: compile(page), site['pages']))
+
     return site
 
 
 class PageHandler(EngineMixin, tornado.web.RequestHandler):
 
     def write_error(self, status_code, **kwargs):
-        slug = "/{}".format(status_code)
+        # default to status_code template
+        tpl_name = f'{status_code}.html'
+        page = None
         try:
-            page_slug, page = self.get_page(slug)
-            template = self.get_template('{0}.html'.format(status_code))
-        except tornado.web.HTTPError or TemplateNotFound:
+            # try to get custom error page from site.yaml
+            _, page, _ = self.get_page(f"/{status_code}")
+        except tornado.web.HTTPError:
+            # if site.yaml doesn't have a page for this error code
+            pass
+        else:
+            # overwrite with page's template if set
+            if 'tpl_name' in page:
+                tpl_name = page['tpl_name']
+
+        try:
+            template = self.get_template(tpl_name)
+        except TemplateNotFound:
+            # fall back to Tornado default error page
             super(PageHandler, self).write_error(status_code, **kwargs)
         else:
+            # return our custom error page
             error_response = template.render(site=self.site, page=page)
-
-            self.write(error_response)
-            self.finish()
+            self.finish(error_response)
 
     @tornado.web.removeslash
     @secure_headers
@@ -88,7 +103,7 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
 
     @tornado.gen.coroutine
     def get(self, slug=None):
-        page_slug, page = self.get_page(slug)
+        page_slug, page, named_groups = self.get_page(slug)
 
         if 'redirect' in page:
             perm = False
@@ -101,8 +116,8 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
         if 'data_sources' in page:
             sources = page['data_sources']
             for name in sources:
-                source_slug = slug[len(page_slug.strip('*')):]
-                data = yield self.get_data(sources[name], slug=source_slug)
+                data = yield self.get_data(sources[name],
+                                           named_groups=named_groups)
                 data_sources[name] = data
 
         if 'published' in page and page['published'] is False:
@@ -118,5 +133,4 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
 
         response = template.render(site=self.site, page=page, **data_sources)
 
-        self.write(response)
-        self.finish()
+        self.finish(response)

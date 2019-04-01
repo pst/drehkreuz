@@ -54,24 +54,43 @@ pages:
     published: true
     title: "Test Overwritten Template Name"
     tpl_name: "/test-tpl-name-autodetect.html"
-  /test-wildcard_slugs/a/b/c/*:
+  /test-wildcard_slugs/a/b/c/.*:
     listed: false
     position: 0
     published: true
     title: "Wildcard Slugs"
     tpl_name: "/test-wildcard_slugs_3_levels.html"
-  /test-wildcard_slugs/a/b/*:
+  /test-wildcard_slugs/a/b/.*:
     listed: false
     position: 0
     published: true
     title: "Wildcard Slugs"
     tpl_name: "/test-wildcard_slugs_2_levels.html"
-  /test-wildcard_slugs/a/*:
+  /test-wildcard_slugs/a/.*:
     listed: false
     position: 0
     published: true
     title: "Wildcard Slugs"
     tpl_name: "/test-wildcard_slugs_1_level.html"
+  /test-wildcard_slugs-data_source/(?P<name>.*):
+    listed: false
+    position: 0
+    published: true
+    title: "Wildcard Slugs"
+    tpl_name: "/test-wildcard_slugs_data_source.html"
+    data_sources:
+      wildcard_data:
+        format: "json"
+        src: "{name}.json"
+  /test_two_named_groups/(?P<path>.+)/(?P<file>.*):
+    listed: false
+    position: 0
+    published: true
+    tpl_name: index.html
+    data_sources:
+      data:
+        format: "json"
+        src: "{path}/{file}.json"
   /test-site-yaml-template-support:
     listed: false
     position: 0

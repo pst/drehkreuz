@@ -75,7 +75,6 @@ class TestPageHandler(TestHandlerBase):
 
         # CSS
         expected_stylesheet_regexp = rb'<link type="text/css" rel="stylesheet" media="screen" href="/assets/dist/css/style.css[\?v=a-z0-9]*">'  # noqa: E501
-        print(response.body)
         self.assertRegexpMatches(response.body, expected_stylesheet_regexp)
 
         css_response = self.fetch(
@@ -179,6 +178,24 @@ class TestPageHandler(TestHandlerBase):
         expected_h1 = b'<h1>/test-wildcard_slugs/a/test</h1>'
         self.assertIn(expected_h1, response.body)
 
+    def test_wildcard_slugs_data_source(self):
+
+        response = self.fetch(
+            '/test-wildcard_slugs-data_source/wildcard_data', method='GET')
+        self.assertEqual(200, response.code)
+
+        expected_h1 = b'<h1>{\'key\': \'value\'}</h1>'
+        self.assertIn(expected_h1, response.body)
+
+    def test_two_named_groups_data_source(self):
+        response = self.fetch(
+            '/test_two_named_groups/path1/file', method='GET')
+        self.assertEqual(200, response.code)
+
+        response = self.fetch(
+            '/test_two_named_groups/path2/file', method='GET')
+        self.assertEqual(200, response.code)
+
     def test_site_yaml_template_support(self):
 
         response = self.fetch('/test-site-yaml-template-support', method='GET')
@@ -235,3 +252,9 @@ class TestPageHandler(TestHandlerBase):
             '/test-redirect-perm', method='GET', follow_redirects=False)
         self.assertEqual(301, response.code)
         self.assertEqual(response.headers['Location'], '/')
+
+    def test_custom_error_page(self):
+        response = self.fetch('/404-test', method='GET')
+        self.assertEqual(404, response.code)
+        expected_h1 = b'<h1>404 Page Not Found</h1>'
+        self.assertIn(expected_h1, response.body)
