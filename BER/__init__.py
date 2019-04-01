@@ -80,8 +80,7 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
         else:
             error_response = template.render(site=self.site, page=page)
 
-            self.write(error_response)
-            self.finish()
+            self.finish(error_response)
 
     @tornado.web.removeslash
     @secure_headers
@@ -121,5 +120,4 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
 
         response = template.render(site=self.site, page=page, **data_sources)
 
-        self.write(response)
-        self.finish()
+        self.finish(response)
