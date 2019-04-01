@@ -107,9 +107,10 @@ class EngineMixin(object):
 
         if src.startswith('http'):
             request = tornado.httpclient.HTTPRequest(src)
-            response = yield self.client.fetch(request)
-            if response.code >= 400:
-                raise tornado.web.HTTPError(response.code)
+            try:
+                response = yield self.client.fetch(request)
+            except tornado.httpclient.HTTPClientError as e:
+                raise tornado.web.HTTPError(e.code)
             data = response.body
         else:
             path = os.path.join(self.settings['data_path'], src)
