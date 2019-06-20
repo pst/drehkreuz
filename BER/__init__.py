@@ -4,6 +4,8 @@ from re import compile
 
 from jinja2 import Environment, TemplateNotFound
 
+from prometheus_client import Counter, REGISTRY, Summary, exposition
+
 import tornado.web
 
 import yaml
@@ -69,8 +71,17 @@ def init_site(site_path):
 
 
 class PageHandler(EngineMixin, tornado.web.RequestHandler):
+    request_time = Summary(
+        'request_processing_seconds', 'Time spent processing request')
+    request_total = Counter(
+        'request_total', 'HTTP Requests', ['method', 'uri'])
+    error_total = Counter(
+        'error_total', 'HTTP Errors', ['method', 'uri', 'status'])
 
     def write_error(self, status_code, **kwargs):
+        self.error_total.labels(
+            self.request.method, self.request.uri, status_code).inc()
+
         # default to status_code template
         tpl_name = f'{status_code}.html'
         page = None
@@ -95,11 +106,12 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
             error_response = template.render(site=self.site, page=page)
             self.finish(error_response)
 
+    @request_time.time()
     @tornado.web.removeslash
     @secure_headers
     @force_https
     def prepare(self):
-        pass
+        self.request_total.labels(self.request.method, self.request.uri).inc()
 
     @tornado.gen.coroutine
     def get(self, slug=None):
@@ -134,3 +146,11 @@ class PageHandler(EngineMixin, tornado.web.RequestHandler):
         response = template.render(site=self.site, page=page, **data_sources)
 
         self.finish(response)
+
+
+class MetricsHandler(tornado.web.RequestHandler):
+    def get(self):
+        encoder, content_type = exposition.choose_encoder(
+            self.request.headers.get('Accept'))
+        self.set_header('Content-Type', content_type)
+        self.write(encoder(REGISTRY))

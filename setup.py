@@ -17,6 +17,7 @@ setup(
         "webassets",
         "libsass",
         "feedparser",
-        "misaka"
+        "misaka",
+        "prometheus-client"
     ]
 )
