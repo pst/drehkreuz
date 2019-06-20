@@ -3,7 +3,7 @@
 
 import json
 import os
-from time import strftime
+from time import strftime, time
 
 import feedparser
 
@@ -13,6 +13,8 @@ from jinja2 import (Environment as JinjaEnvironment,
                     Markup)
 
 import misaka
+
+from prometheus_client import Summary
 
 import tornado.gen
 import tornado.httpclient
@@ -28,6 +30,9 @@ import yaml
 
 
 class EngineMixin(object):
+    get_data_time = Summary('get_data_time',
+                            'Time spent getting data.',
+                            ['src', 'format'])
 
     def initialize(self):
         loader = FileSystemLoader([
@@ -98,34 +103,51 @@ class EngineMixin(object):
         return globals
 
     @tornado.gen.coroutine
+    def get_data_remote(self, src):
+        request = tornado.httpclient.HTTPRequest(src)
+        try:
+            response = yield self.client.fetch(request)
+        except tornado.httpclient.HTTPClientError as e:
+            raise tornado.web.HTTPError(e.code)
+        return response.body
+
+    @tornado.gen.coroutine
+    def get_data_local(self, src):
+        path = os.path.join(self.settings['data_path'], src)
+        try:
+            with open(path) as f:
+                return f.read()
+        except IOError:
+            raise tornado.web.HTTPError(404)
+
+    def parse_data(self, format, data):
+        if format == 'json':
+            parsed_data = json.loads(data)
+        elif format == 'yaml':
+            parsed_data = yaml.safe_load(data)
+        elif format == 'rss':
+            parsed_data = feedparser.parse(data)
+        return parsed_data
+
+    @tornado.gen.coroutine
     def get_data(self, source, named_groups=None):
+        start_time = time()
         data = None
         src = source['src']
+        format = source['format']
 
         if named_groups:
             src = src.format(**named_groups)
 
         if src.startswith('http'):
-            request = tornado.httpclient.HTTPRequest(src)
-            try:
-                response = yield self.client.fetch(request)
-            except tornado.httpclient.HTTPClientError as e:
-                raise tornado.web.HTTPError(e.code)
-            data = response.body
+            data = yield self.get_data_remote(src)
         else:
-            path = os.path.join(self.settings['data_path'], src)
-            try:
-                with open(path) as f:
-                    data = f.read()
-            except IOError:
-                raise tornado.web.HTTPError(404)
+            data = yield self.get_data_local(src)
 
-        if source['format'] == 'json':
-            parsed_data = json.loads(data)
-        elif source['format'] == 'yaml':
-            parsed_data = yaml.safe_load(data)
-        elif source['format'] == 'rss':
-            parsed_data = feedparser.parse(data)
+        parsed_data = self.parse_data(format, data)
+
+        time_delta = time() - start_time
+        self.get_data_time.labels(src, format).observe(time_delta)
 
         return parsed_data
 
