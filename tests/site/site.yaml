@@ -130,3 +130,10 @@ pages:
         format: "yaml"
         src: "test_markdown.yaml"
     tpl_name: "/test-markdown.html"
+  /markdown-with-ctx:
+    test_variable: TEST-CTX
+    data_sources:
+      entry:
+        format: "yaml"
+        src: "test_markdown_tpl.yaml"
+    tpl_name: "/test-markdown-ctx.html"

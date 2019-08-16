@@ -84,11 +84,13 @@ class EngineMixin(object):
     def strftime(self, time_struct, format):
         return strftime(format, time_struct)
 
-    def markdown(self, text):
+    def markdown(self, text, ctx=dict()):
         md = misaka.Markdown(
             misaka.HtmlRenderer(),
             extensions=('fenced-code',))
-        return Markup(md(text))
+        tpl = JinjaEnvironment().from_string(text)
+        print(ctx)
+        return Markup(md(tpl.render(**ctx)))
 
     def get_globals(self):
         globals = {
